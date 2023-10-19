@@ -1,10 +1,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "Timer.h"
+#include "timer.h"
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(timer_module, m) {
+PYBIND11_MODULE(timer_python_module, m) {
     m.doc() = "Python binding for Timer class";
 
     py::enum_<TimerOperation>(m, "TimerOperation")

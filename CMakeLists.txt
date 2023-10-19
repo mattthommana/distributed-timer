@@ -18,7 +18,7 @@ set(NUM_PARALLEL "20" CACHE STRING "Number of parallel threads")
 set(OFFLINE_MODE OFF CACHE BOOL "Offline Mode for Air Gap. Leave SOURCE_CACHE_DIR, delete INSTALL_CACHE_DIR, BUILD_CACHE_DIR, and build and reinstall without internet.")
 set(BUILD_EXAMPLES ON CACHE BOOL "Build examples (Uses cppzmq, requires libzmq)")
 set(BUILD_DOC OFF CACHE BOOL "Build Documentation (Requires doxygen > 1.9.8)")
-set(CREATE_PYTHON_BINDINGS OFF CACHE BOOL "Build Python Bindings")
+set(CREATE_PYTHON_BINDINGS ON CACHE BOOL "Build Python Bindings")
 
 
 message(
@@ -35,7 +35,7 @@ set(INSTALL_CACHE_DIR "${CACHE_DIR}/install")
 set(BUILD_CACHE_DIR "${CACHE_DIR}/build")
 
 # Ensure we have Python
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 message(STATUS "Python3_EXECUTABLE: ${Python3_EXECUTABLE}")
 message(STATUS "Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3_SITELIB: ${Python3_SITELIB}")
@@ -70,6 +70,8 @@ set(LIBRARY_FILES
 )
 add_library(${PROJECT_NAME} STATIC ${LIBRARY_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs nlohmann_json::nlohmann_json)
+target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+
 
 set(MERGER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/merger.cpp
@@ -144,11 +146,10 @@ endif()
 
 if(${CREATE_PYTHON_BINDINGS})
     # Add pybind11
-    list(APPEND CMAKE_MODULE_PATH "${Python3_SITELIB}/pybind11/share/cmake/pybind11")
-    find_package(pybind11 REQUIRED)
+    find_package(pybind11 REQUIRED PATHS "${Python3_SITELIB}/pybind11/share/cmake/pybind11" NO_DEFAULT_PATH)
 
     # Add the timer binding to a Python module
-    pybind11_add_module(timer_python_module ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/timer_binding.cpp)
+    pybind11_add_module(timer_python_module ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/python_bindings.cpp)
     target_link_libraries(timer_python_module PRIVATE ${PROJECT_NAME} nlohmann_json::nlohmann_json)
 endif()
 
