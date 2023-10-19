@@ -1,0 +1,13 @@
+build/
+*.json
+*.csv
+*.exe
+*.so
+*.a
+*.bin
+*~
+logs
+scripts/secrets.py
+cache/
+docs/doxygen
+.vscode

@@ -1,0 +1,58 @@
+version: '3'
+services:
+  client:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    working_dir: /workspace/build
+    command: ./distributed_timer_client --docker
+    # command: /bin/bash
+    volumes:
+      - ../logs:/workspace/logs
+    depends_on:
+      - server 
+    networks:
+      timer-net:
+        aliases:
+          - client 
+    profiles:
+      - run-test
+
+
+  server:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    working_dir: /workspace/build
+    command: ./distributed_timer_server --docker
+    volumes:
+      - ../logs:/workspace/logs
+    networks:
+      timer-net:
+        aliases:
+          - server 
+    profiles:
+      - run-test
+
+  event-merger:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    working_dir: /workspace/build
+    command: ./distributed_timer_merge_tool /workspace/logs/combined.json /workspace/logs/client-times.json /workspace/logs/server-times.json
+    volumes:
+      - ../logs:/workspace/logs
+    profiles:
+      - merge-files
+
+networks:
+  timer-net:
